@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Website Admin — Priyansh Auto E.V.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#0A0F1D;--panel:#111827;--line:#263247;--text:#F9FAFB;--muted:#9CA3AF;--green:#3D6FE5;--red:#F87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 "Manrope",system-ui,-apple-system,sans-serif}
+main{width:min(100% - 32px,1050px);margin:38px auto 80px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;line-height:1.2}
+h1{font-size:clamp(28px,5vw,42px);margin:0}
+h2{font-size:23px;margin:0 0 8px}
+p{color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px}
+.top a{color:var(--green);text-decoration:none;font-weight:700}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;margin:18px 0}
+.hint{font-size:13px;margin:6px 0 20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+label{display:grid;gap:6px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#0A0F1D;color:var(--text);font:inherit;text-transform:none;letter-spacing:normal}
+textarea{min-height:84px;resize:vertical}
+input[type=file]{padding:8px;font-size:12px}
+input[type=checkbox]{width:auto;accent-color:var(--green)}
+.check{display:flex;align-items:center;gap:9px;padding-top:25px}
+.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+button{border:0;border-radius:10px;padding:11px 16px;background:var(--green);color:#fff;font:600 14px "Manrope",system-ui,sans-serif;cursor:pointer}
+button.secondary{border:1px solid var(--line);background:transparent;color:var(--text)}
+button.danger{border:1px solid #7f3030;background:transparent;color:#FCA5A5}
+button:disabled{opacity:.55;cursor:wait}
+.status{min-height:24px;color:var(--green);font-size:13px}
+.status.error{color:var(--red)}
+[hidden]{display:none!important}
+.product{border-top:1px solid var(--line);padding:20px 0}
+.product:first-child{border-top:0}
+.product-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.product-head h3{margin:0;font-size:18px}
+.product .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.product .wide{grid-column:span 2}
+.image-preview{width:100%;height:130px;object-fit:cover;border-radius:10px;background:#0A0F1D;border:1px solid var(--line)}
+.file-field{margin-top:8px}
+.login{max-width:430px;margin:60px auto}
+.login .grid{grid-template-columns:1fr}
+.muted{color:var(--muted);font-size:12px}
+@media(max-width:700px){main{margin-top:20px}.panel{padding:18px}.grid,.product .grid{grid-template-columns:1fr}.product .wide{grid-column:auto}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><p style="margin:0 0 4px;color:var(--green);font-weight:700">PRIYANSH AUTO E.V.</p><h1>Website admin</h1></div>
+    <a href="index.html">View website →</a>
+  </div>
+  <section class="panel login" id="loginPanel">
+    <h2>Admin sign in</h2>
+    <p class="hint">Sign in with the admin account configured in Supabase.</p>
+    <form id="loginForm" class="grid">
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <div class="actions"><button type="submit">Sign in</button><span class="status" id="loginStatus" role="status" aria-live="polite"></span></div>
+    </form>
+  </section>
+  <section id="dashboard" hidden>
+    <div class="actions" style="justify-content:flex-end"><span id="signedInAs" class="muted"></span><button class="secondary" id="signOut" type="button">Sign out</button></div>
+    <form class="panel" id="settingsForm">
+      <h2>Website content</h2>
+      <p class="hint">Changes are published immediately to the public website.</p>
+      <div class="grid">
+        <label>Business name<input name="brandName" required maxlength="120"></label>
+        <label>Location heading<input name="locationHeading" required maxlength="120"></label>
+        <label>Hero headline — line 1<input name="heroLine1" required maxlength="80"></label>
+        <label>Hero headline — line 2<input name="heroLine2" required maxlength="80"></label>
+        <label class="wide">Hero headline — line 3<input name="heroLine3" required maxlength="100"></label>
+        <label class="wide">Hero description<textarea name="heroDescription" required maxlength="500"></textarea></label>
+        <label class="wide">Business address<textarea name="address" required maxlength="300"></textarea></label>
+        <label>Call phone (with country code)<input name="phoneNumber" inputmode="tel" required placeholder="918528889901"></label>
+        <label>WhatsApp number (with country code)<input name="whatsappNumber" inputmode="tel" required placeholder="919321180132"></label>
+        <label>Google Maps / Business URL<input name="mapsUrl" type="url" required></label>
+        <label>Instagram URL<input name="instagramUrl" type="url" required></label>
+        <label>Instagram display text<input name="instagramDisplay" maxlength="80"></label>
+      </div>
+      <h3>Website images</h3>
+      <div class="grid" id="siteImages"></div>
+      <div class="actions"><button type="submit">Save website content</button><span class="status" id="settingsStatus" role="status" aria-live="polite"></span></div>
+    </form>
+    <section class="panel">
+      <h2>Scooter models</h2>
+      <p class="hint">Add, edit, reorder, feature or remove models. Upload images or paste an HTTPS image URL.</p>
+      <div id="products"></div>
+      <div class="actions"><button id="addProduct" type="button">Add model</button><span class="status" id="productStatus" role="status" aria-live="polite"></span></div>
+    </section>
+  </section>
+</main>
+<script>
+(function(){
+  var config=window.SUPABASE_CONFIG||{};
+  var status=function(id,message,isError){
+    var element=document.getElementById(id);
+    element.textContent=message;
+    element.classList.toggle("error",!!isError);
+  };
+  var escapeHtml=function(value){
+    return String(value==null?"":value).replace(/[&<>"']/g,function(char){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];
+    });
+  };
+  if(!config.url||!config.anonKey||!window.supabase){
+    status("loginStatus","Set the Supabase project URL and anon key in supabase-config.js first.",true);
+    document.querySelectorAll("#loginForm input,#loginForm button").forEach(function(input){input.disabled=true});
+    return;
+  }
+  var client=window.supabase.createClient(config.url,config.anonKey);
+  var products=[];
+  var settings={};
+  var settingFields=["brandName","locationHeading","heroLine1","heroLine2","heroLine3","heroDescription","address","phoneNumber","whatsappNumber","mapsUrl","instagramUrl","instagramDisplay"];
+  var imageFields=[
+    {key:"heroImage",label:"Hero image"},
+    {key:"enquiryImage",label:"Enquiry image"},
+    {key:"contactImage",label:"Contact image"}
+  ];
+  function showDashboard(user){
+    document.getElementById("loginPanel").hidden=true;
+    document.getElementById("dashboard").hidden=false;
+    document.getElementById("signedInAs").textContent=user.email;
+  }
+  function setFormValues(form,values,fields){
+    fields.forEach(function(field){
+      var input=form.elements.namedItem(field);
+      if(input)input.value=values[field]||"";
+    });
+  }
+  function renderImages(){
+    document.getElementById("siteImages").innerHTML=imageFields.map(function(field){
+      return '<div><label>'+escapeHtml(field.label)+' URL<input name="'+field.key+'" type="url" required></label>'+
+        '<label class="file-field">Upload new image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-upload-for="'+field.key+'"></label>'+
+        '<img class="image-preview" data-preview-for="'+field.key+'" alt="'+escapeHtml(field.label)+' preview"></div>';
+    }).join("");
+    imageFields.forEach(function(field){
+      var input=document.querySelector('[name="'+field.key+'"]');
+      input.value=settings[field.key]||"";
+      document.querySelector('[data-preview-for="'+field.key+'"]').src=settings[field.key]||"";
+    });
+  }
+  function renderProducts(){
+    document.getElementById("products").innerHTML=products.map(function(product,index){
+      var id=String(product.id);
+      return '<article class="product" id="product-'+escapeHtml(id)+'" data-product-id="'+escapeHtml(id)+'">'+
+        '<div class="product-head"><h3>'+escapeHtml(product.name||("New model "+(index+1)))+'</h3>'+
+        '<button class="danger delete-product" type="button">Delete</button></div>'+
+        '<div class="grid">'+
+        '<label>Brand<input data-field="brand" required maxlength="60" value="'+escapeHtml(product.brand)+'"></label>'+
+        '<label>Model name<input data-field="name" required maxlength="100" value="'+escapeHtml(product.name)+'"></label>'+
+        '<label>Price (blank for call)<input data-field="price" type="number" min="0" step="1" value="'+escapeHtml(product.price==null?"":product.price)+'"></label>'+
+        '<label>Range / notes<input data-field="range_text" maxlength="160" value="'+escapeHtml(product.range_text||product.range)+'"></label>'+
+        '<label>Display order<input data-field="sort_order" type="number" min="0" step="1" value="'+escapeHtml(product.sort_order||0)+'"></label>'+
+        '<label class="check"><input data-field="featured" type="checkbox" '+(product.featured?"checked":"")+'> Featured model</label>'+
+        '<label class="wide">Image URL<input data-field="image_url" type="url" required value="'+escapeHtml(product.image_url||product.img)+'"></label>'+
+        '<label>Upload model image<input class="file-field" data-upload-for="product" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>'+
+        '<img class="image-preview" data-product-preview src="'+escapeHtml(product.image_url||product.img||"")+'" alt="Model image preview">'+
+        '</div><div class="actions"><button class="save-product" type="button">Save model</button></div></article>';
+    }).join("");
+  }
+  async function loadContent(){
+    var settingsResult=await client.from("site_content").select("content").eq("id",1).maybeSingle();
+    if(settingsResult.error)throw settingsResult.error;
+    if(!settingsResult.data)throw new Error("No site content found. Run supabase-setup.sql in the Supabase SQL Editor.");
+    settings=settingsResult.data.content||{};
+    var productsResult=await client.from("products").select("*").order("sort_order");
+    if(productsResult.error)throw productsResult.error;
+    products=productsResult.data||[];
+    setFormValues(document.getElementById("settingsForm"),settings,settingFields);
+    renderImages();
+    renderProducts();
+  }
+  async function uploadImage(file){
+    if(!file)return "";
+    if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type))throw new Error("Choose a JPG, PNG, WebP or GIF image.");
+    if(file.size>5*1024*1024)throw new Error("Images must be 5 MB or smaller.");
+    var name=crypto.randomUUID()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+    var result=await client.storage.from("site-images").upload(name,file,{cacheControl:"3600",upsert:false});
+    if(result.error)throw result.error;
+    return client.storage.from("site-images").getPublicUrl(result.data.path).data.publicUrl;
+  }
+  function validHttpsUrl(value,label){
+    var url;
+    try{url=new URL(value)}catch(_){throw new Error(label+" must be a valid HTTPS URL.")};
+    if(url.protocol!=="https:")throw new Error(label+" must use HTTPS.");
+    return url.href;
+  }
+  document.getElementById("loginForm").addEventListener("submit",async function(event){
+    event.preventDefault();
+    var form=event.currentTarget;
+    var button=form.querySelector("button");
+    button.disabled=true;
+    status("loginStatus","Signing in…");
+    try{
+      var result=await client.auth.signInWithPassword({email:form.elements.email.value.trim(),password:form.elements.password.value});
+      if(result.error)throw result.error;
+      if(!result.data.user||!result.data.user.app_metadata||result.data.user.app_metadata.role!=="admin"){
+        await client.auth.signOut();
+        throw new Error("This account is not an administrator. Ask the project owner to grant the admin role.");
+      }
+      showDashboard(result.data.user);
+      try{await loadContent()}catch(error){status("settingsStatus",error.message||"Could not load website content.",true)}
+    }catch(error){status("loginStatus",error.message||"Sign-in failed.",true)}
+    finally{button.disabled=false}
+  });
+  document.getElementById("settingsForm").addEventListener("submit",async function(event){
+    event.preventDefault();
+    var form=event.currentTarget;
+    var button=form.querySelector('button[type="submit"]');
+    button.disabled=true;
+    status("settingsStatus","Saving…");
+    try{
+      var content={};
+      settingFields.forEach(function(key){content[key]=form.elements.namedItem(key).value.trim()});
+      ["phoneNumber","whatsappNumber"].forEach(function(key){
+        content[key]=content[key].replace(/\D/g,"");
+        if(content[key].length<10||content[key].length>15)throw new Error(key==="phoneNumber"?"Enter a valid phone number including country code.":"Enter a valid WhatsApp number including country code.");
+      });
+      content.mapsUrl=validHttpsUrl(content.mapsUrl,"Google Maps URL");
+      content.instagramUrl=validHttpsUrl(content.instagramUrl,"Instagram URL");
+      imageFields.forEach(function(field){
+        content[field.key]=validHttpsUrl(form.elements.namedItem(field.key).value.trim(),field.label+" URL");
+      });
+      var result=await client.from("site_content").upsert({id:1,content:content,updated_at:new Date().toISOString()});
+      if(result.error)throw result.error;
+      settings=content;
+      status("settingsStatus","Saved. The public website now shows these changes.");
+    }catch(error){status("settingsStatus",error.message||"Could not save website content.",true)}
+    finally{button.disabled=false}
+  });
+  document.getElementById("siteImages").addEventListener("change",async function(event){
+    var input=event.target;
+    var key=input.getAttribute("data-upload-for");
+    if(!key||!input.files||!input.files[0])return;
+    input.disabled=true;
+    status("settingsStatus","Uploading image…");
+    try{
+      var url=await uploadImage(input.files[0]);
+      var urlInput=document.querySelector('#settingsForm [name="'+key+'"]');
+      urlInput.value=url;
+      document.querySelector('[data-preview-for="'+key+'"]').src=url;
+      status("settingsStatus","Image uploaded. Save website content to publish it.");
+    }catch(error){status("settingsStatus",error.message||"Image upload failed.",true)}
+    finally{input.disabled=false;input.value=""}
+  });
+  document.getElementById("products").addEventListener("change",async function(event){
+    var input=event.target;
+    if(input.getAttribute("data-upload-for")!=="product"||!input.files||!input.files[0])return;
+    var card=input.closest(".product");
+    input.disabled=true;
+    status("productStatus","Uploading model image…");
+    try{
+      var url=await uploadImage(input.files[0]);
+      card.querySelector('[data-field="image_url"]').value=url;
+      card.querySelector("[data-product-preview]").src=url;
+      status("productStatus","Image uploaded. Save the model to publish it.");
+    }catch(error){status("productStatus",error.message||"Image upload failed.",true)}
+    finally{input.disabled=false;input.value=""}
+  });
+  document.getElementById("products").addEventListener("click",async function(event){
+    var card=event.target.closest(".product");
+    if(!card)return;
+    var id=card.getAttribute("data-product-id");
+    if(event.target.classList.contains("save-product")){
+      event.target.disabled=true;
+      status("productStatus","Saving model…");
+      try{
+        var product={id:id};
+        card.querySelectorAll("[data-field]").forEach(function(input){
+          var key=input.getAttribute("data-field");
+          product[key]=input.type==="checkbox"?input.checked:input.value.trim();
+        });
+        if(!product.brand||!product.name)throw new Error("Brand and model name are required.");
+        product.price=product.price===""?null:Number(product.price);
+        product.sort_order=Number(product.sort_order)||0;
+        product.image_url=validHttpsUrl(product.image_url,"Model image URL");
+        product.range_text=product.range_text||"";
+        var result=await client.from("products").upsert(product);
+        if(result.error)throw result.error;
+        status("productStatus","Model saved and published.");
+        await loadContent();
+      }catch(error){status("productStatus",error.message||"Could not save the model.",true)}
+      finally{event.target.disabled=false}
+    }
+    if(event.target.classList.contains("delete-product")){
+      if(!confirm("Delete this model from the website?"))return;
+      event.target.disabled=true;
+      try{
+        var result=await client.from("products").delete().eq("id",id);
+        if(result.error)throw result.error;
+        products=products.filter(function(product){return String(product.id)!==id});
+        renderProducts();
+        status("productStatus","Model deleted.");
+      }catch(error){status("productStatus",error.message||"Could not delete the model.",true)}
+      finally{event.target.disabled=false}
+    }
+  });
+  document.getElementById("addProduct").addEventListener("click",function(){
+    products.push({id:crypto.randomUUID(),brand:"",name:"",price:null,range_text:"",featured:false,image_url:"",sort_order:products.length+1});
+    renderProducts();
+    var cards=document.querySelectorAll(".product");
+    cards[cards.length-1].scrollIntoView({behavior:"smooth",block:"center"});
+    cards[cards.length-1].querySelector('[data-field="brand"]').focus();
+  });
+  document.getElementById("signOut").addEventListener("click",async function(){
+    var result=await client.auth.signOut();
+    if(result.error){status("settingsStatus",result.error.message,true);return}
+    document.getElementById("dashboard").hidden=true;
+    document.getElementById("loginPanel").hidden=false;
+    document.getElementById("loginForm").reset();
+  });
+  client.auth.getSession().then(async function(result){
+    if(result.error){status("loginStatus",result.error.message,true);return}
+    var user=result.data.session&&result.data.session.user;
+    if(!user)return;
+    if(!user.app_metadata||user.app_metadata.role!=="admin"){
+      await client.auth.signOut();
+      status("loginStatus","This account is not an administrator.",true);
+      return;
+    }
+    showDashboard(user);
+    try{await loadContent()}catch(error){status("settingsStatus",error.message||"Could not load website content.",true)}
+  }).catch(function(error){status("loginStatus",error.message||"Could not verify the current session.",true)});
+})();
+</script>
+</body>
+</html>
